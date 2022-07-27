@@ -6,12 +6,14 @@ import 'Authentication/registration_screen.dart';
 import 'Screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(
-      // options: DefaultFirebaseOptions.currentPlatform,
-      );
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
       routes: {
         RegistrationScreen.idScreen: ((context) => const RegistrationScreen()),
         LoginScreen.idScreen: ((context) => const LoginScreen()),
-        HomePage.idScreen: ((context) => const HomePage())
+        HomePage.idScreen: ((context) => HomePage())
       },
     );
   }

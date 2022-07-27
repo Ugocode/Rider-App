@@ -1,11 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rider_app/Authentication/login_screen.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
   //create a route
-  static const String idScreen = 'HomePage';
+  static String idScreen = 'HomePage';
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +21,20 @@ class HomePage extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-      body: Container(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Center(
+            child: ElevatedButton(
+                onPressed: () {
+                  _firebaseAuth.signOut();
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, LoginScreen.idScreen, (route) => false);
+                },
+                child: const Text('logout')),
+          )
+        ],
+      ),
     );
   }
 }
