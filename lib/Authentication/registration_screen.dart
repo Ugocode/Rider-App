@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rider_app/Authentication/login_screen.dart';
 
 import '../Screens/home_screen.dart';
+import '../allWidgets/progress_dialog.dart';
 import '../main.dart';
 //import 'firebase_authetication.dart';
 
@@ -37,12 +38,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         Padding(
           padding: const EdgeInsets.all(30.0),
           child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset('Assets/images/taxi.jpg')),
+            borderRadius: BorderRadius.circular(30),
+            child: Image.asset('Assets/images/taxi.jpg'),
+          ),
         ),
-        const SizedBox(
-          height: 5,
-        ),
+        // const SizedBox(
+        //   height: 2,
+        // ),
         Center(
           child: Text(
             'Register as a Rider',
@@ -155,14 +157,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
 //registration of users
-  void registerUser(
-    BuildContext context,
-  ) async {
+  void registerUser(BuildContext context) async {
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return const ProgressDialog(
+            message: "Registering, Please wait...",
+          );
+        });
     final User? firebaseUser = (await _firebaseAuth
             .createUserWithEmailAndPassword(
                 email: _emailTextEditingController.text,
                 password: _passwordTextEditingController.text)
             .catchError((errorMsg) {
+      Navigator.pop(context);
       displayToastMessage('Error' + errorMsg.toString(), context);
     }))
         .user;
@@ -181,7 +190,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
       Navigator.pushNamedAndRemoveUntil(
           context, HomePage.idScreen, (route) => false);
+      //then we clear the controllers
+      clearTextEditingControllers();
     } else {
+      Navigator.pop(context);
       //error occured
       displayToastMessage(
           "Sorry Error occured your account has NOT been created", context);
@@ -203,11 +215,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 //         _phoneTextEditingController.text.trim());
 //   }
 
-//   //cleart text edting controllers:
-//   clearTextEditingControllers() {
-//     _emailTextEditingController.clear();
-//     _passwordTextEditingController.clear();
-//     _nameTextEditingController.clear();
-//     _phoneTextEditingController.clear();
-//   }
+  //cleart text edting controllers:
+  clearTextEditingControllers() {
+    // _emailTextEditingController.clear();
+    _passwordTextEditingController.clear();
+    _nameTextEditingController.clear();
+    _phoneTextEditingController.clear();
+  }
 }

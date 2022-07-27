@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rider_app/Authentication/registration_screen.dart';
+import 'package:rider_app/allWidgets/progress_dialog.dart';
 
 import '../Screens/home_screen.dart';
 import '../main.dart';
@@ -112,12 +113,23 @@ Future _validateAndLoginUser(context) async {
 
 //Function to Sign in user
 void loginUser(context) async {
+  showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return const ProgressDialog(
+          message: "Authenticating, Please wait...",
+        );
+      });
+
   final User? firebaseUser = (await _firebaseAuth
           .signInWithEmailAndPassword(
               email: _emailTextEditingController.text,
               password: _passwordTextEditingController.text)
           .catchError((errorMsg) {
-    displayToastMessage('Error' + errorMsg.toString(), context);
+    Navigator.pop(context);
+    displayToastMessage('Error' + errorMsg.toString(), context,
+        color: Colors.red);
   }))
       .user;
 
@@ -127,15 +139,19 @@ void loginUser(context) async {
       if (dataSnapshot.value != null) {
         Navigator.pushNamedAndRemoveUntil(
             context, HomePage.idScreen, (route) => false);
+        //clear the user details from the controllers:
+        clearTextEditingControllers();
         displayToastMessage('You are logged-in', context, color: Colors.green);
       } else {
         _firebaseAuth.signOut();
+        Navigator.pop(context);
         displayToastMessage(
             "No record exist for this user, please create account", context,
             color: Colors.red);
       }
     });
   } else {
+    Navigator.pop(context); //to remove the progress dialog indicator
     displayToastMessage("error occured cannot be signed in", context,
         color: Colors.red);
   }
@@ -144,4 +160,10 @@ void loginUser(context) async {
 //to display flutter toast
 displayToastMessage(String message, BuildContext context, {Color? color}) {
   Fluttertoast.showToast(msg: message, backgroundColor: color);
+}
+
+//cleart text edting controllers:
+clearTextEditingControllers() {
+  // _emailTextEditingController.clear();
+  _passwordTextEditingController.clear();
 }
