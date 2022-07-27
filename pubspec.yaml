@@ -38,7 +38,8 @@ dependencies:
   firebase_auth:
   firebase_database:
   google_fonts: 
-  fluttertoast: 
+  fluttertoast:
+  google_maps_flutter: 
 
 dev_dependencies:
   flutter_test:
