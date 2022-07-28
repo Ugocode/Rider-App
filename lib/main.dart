@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:rider_app/Authentication/login_screen.dart';
+import 'package:rider_app/Screens/about_us.dart';
 
 import 'Authentication/registration_screen.dart';
 import 'Screens/home_screen.dart';
@@ -35,11 +36,12 @@ class MyApp extends StatelessWidget {
           primaryColor: const Color.fromRGBO(115, 2, 44, 2),
           primarySwatch: Colors.pink),
       //creating Routes for our app
-      initialRoute: LoginScreen.idScreen,
+      initialRoute: HomePage.idScreen,
       routes: {
         RegistrationScreen.idScreen: ((context) => const RegistrationScreen()),
         LoginScreen.idScreen: ((context) => const LoginScreen()),
-        HomePage.idScreen: ((context) => HomePage())
+        HomePage.idScreen: ((context) => const HomePage()),
+        AboutUs.idScreen: (context) => const AboutUs(),
       },
     );
   }
