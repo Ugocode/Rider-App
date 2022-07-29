@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rider_app/Assistants/assistant%20_methods.dart';
 import 'package:rider_app/Authentication/login_screen.dart';
 import 'package:rider_app/allWidgets/divider_widget.dart';
 import 'package:rider_app/allWidgets/drawer_widget.dart';
@@ -23,10 +25,33 @@ class _HomePageState extends State<HomePage> {
   final Completer<GoogleMapController> _controllerGoogleMap = Completer();
   GoogleMapController? newGoogleMapController;
 
+  //geolocator:
+  Position? currentPosition;
+  var geoLocator = Geolocator();
+
+  void locatePosition() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    currentPosition = position;
+
+    LatLng livePosition = LatLng(position.latitude, position.longitude);
+
+    CameraPosition cameraPosition =
+        CameraPosition(target: livePosition, zoom: 14);
+    newGoogleMapController!
+        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+//to get the address the user inputs into the app:
+    String address = await AssistantMethods.searchCoordinateAddress(position);
+    print("this is your address" + address);
+  }
+
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
   );
+
+  double bottomPaddingOfMap = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +79,22 @@ class _HomePageState extends State<HomePage> {
         body: Stack(
           children: [
             GoogleMap(
-              mapType: MapType.satellite,
+              padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
+              mapType: MapType.normal,
               myLocationButtonEnabled: true,
               initialCameraPosition: _kGooglePlex,
+              myLocationEnabled: true,
+              zoomControlsEnabled: true,
+              zoomGesturesEnabled: true,
               onMapCreated: (GoogleMapController controller) {
                 _controllerGoogleMap.complete(controller);
                 newGoogleMapController = controller;
+
+                //call the locate posion function
+                locatePosition();
+                setState(() {
+                  bottomPaddingOfMap = 280.0;
+                });
               },
             ),
             Positioned(
@@ -67,7 +102,7 @@ class _HomePageState extends State<HomePage> {
               right: 0.0,
               bottom: 0.0,
               child: Container(
-                height: 320,
+                height: 280,
                 width: 200,
                 decoration: const BoxDecoration(
                     color: Colors.white,
