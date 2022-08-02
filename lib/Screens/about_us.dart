@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rider_app/Screens/home_screen.dart';
 
 class AboutUs extends StatelessWidget {
   const AboutUs({Key? key}) : super(key: key);
@@ -11,7 +12,8 @@ class AboutUs extends StatelessWidget {
       appBar: AppBar(
         leading: InkWell(
             onTap: () {
-              Navigator.pop(context);
+              Navigator.pushNamedAndRemoveUntil(
+                  context, HomePage.idScreen, (route) => false);
             },
             child: const Icon(Icons.backspace_sharp)),
       ),

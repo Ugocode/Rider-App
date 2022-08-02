@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,8 +8,10 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:rider_app/Assistants/assistant%20_methods.dart';
 import 'package:rider_app/Authentication/login_screen.dart';
+import 'package:rider_app/DataHandler/app_data.dart';
 import 'package:rider_app/allWidgets/divider_widget.dart';
 import 'package:rider_app/allWidgets/drawer_widget.dart';
 
@@ -32,18 +36,20 @@ class _HomePageState extends State<HomePage> {
   void locatePosition() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
+
     currentPosition = position;
 
-    LatLng livePosition = LatLng(position.latitude, position.longitude);
+    LatLng latlatPosition = LatLng(position.latitude, position.longitude);
 
     CameraPosition cameraPosition =
-        CameraPosition(target: livePosition, zoom: 14);
+        CameraPosition(target: latlatPosition, zoom: 14);
     newGoogleMapController!
         .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
 //to get the address the user inputs into the app:
-    String address = await AssistantMethods.searchCoordinateAddress(position);
-    print("this is your address" + address);
+    String address =
+        await AssistantMethods.searchCoordinateAddress(position, context);
+    debugPrint("This is your address:" + address);
   }
 
   static const CameraPosition _kGooglePlex = CameraPosition(
@@ -55,6 +61,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //calling the pickuplocation:
+    // var homePickup = Provider.of<AppData>(context).pickUpLocation;
+
     return Scaffold(
         appBar: AppBar(
           elevation: 0.0,
@@ -187,7 +196,13 @@ class _HomePageState extends State<HomePage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("Add Home"),
+                              Text(Provider.of<AppData>(context)
+                                          .pickUpLocation !=
+                                      null
+                                  ? Provider.of<AppData>(context)
+                                      .pickUpLocation!
+                                      .placeName!
+                                  : "its returning null"),
                               const SizedBox(
                                 height: 4.0,
                               ),
