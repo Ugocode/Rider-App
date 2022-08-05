@@ -12,8 +12,12 @@ import 'package:provider/provider.dart';
 import 'package:rider_app/Assistants/assistant%20_methods.dart';
 import 'package:rider_app/Authentication/login_screen.dart';
 import 'package:rider_app/DataHandler/app_data.dart';
+
+import 'package:rider_app/Screens/search_screen.dart';
 import 'package:rider_app/allWidgets/divider_widget.dart';
 import 'package:rider_app/allWidgets/drawer_widget.dart';
+
+import '../allWidgets/progress_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -62,97 +66,113 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     //calling the pickuplocation:
-    // var homePickup = Provider.of<AppData>(context).pickUpLocation;
+    String homeAddress =
+        Provider.of<AppData>(context).pickUpLocation?.placeName ?? "";
 
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0.0,
-          title: Text(
-            'Bolt!',
-            style: GoogleFonts.getFont('Lato'),
-            textAlign: TextAlign.center,
-          ),
-          actions: [
-            IconButton(
-                onPressed: (() {
-                  _firebaseAuth.signOut();
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, LoginScreen.idScreen, (route) => false);
-                }),
-                icon: const Icon(Icons.logout))
-          ],
+      appBar: AppBar(
+        elevation: 0.0,
+        title: Text(
+          'Bolt!',
+          style: GoogleFonts.getFont('Lato'),
+          textAlign: TextAlign.center,
         ),
-        //create a drawer
-        drawer: const DrawerWidget(),
-        //body of the app
-        body: Stack(
-          children: [
-            GoogleMap(
-              padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
-              mapType: MapType.normal,
-              myLocationButtonEnabled: true,
-              initialCameraPosition: _kGooglePlex,
-              myLocationEnabled: true,
-              zoomControlsEnabled: true,
-              zoomGesturesEnabled: true,
-              onMapCreated: (GoogleMapController controller) {
-                _controllerGoogleMap.complete(controller);
-                newGoogleMapController = controller;
+        actions: [
+          IconButton(
+              onPressed: (() {
+                _firebaseAuth.signOut();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, LoginScreen.idScreen, (route) => false);
+              }),
+              icon: const Icon(Icons.logout))
+        ],
+      ),
+      //create a drawer
+      drawer: const DrawerWidget(),
+      //body of the app
+      body: Stack(
+        children: [
+          GoogleMap(
+            padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
+            mapType: MapType.normal,
+            myLocationButtonEnabled: true,
+            initialCameraPosition: _kGooglePlex,
+            myLocationEnabled: true,
+            zoomControlsEnabled: true,
+            zoomGesturesEnabled: true,
+            onMapCreated: (GoogleMapController controller) {
+              _controllerGoogleMap.complete(controller);
+              newGoogleMapController = controller;
 
-                //call the locate posion function
-                locatePosition();
-                setState(() {
-                  bottomPaddingOfMap = 280.0;
-                });
-              },
-            ),
-            Positioned(
-              left: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              child: Container(
-                height: 280,
-                width: 200,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      topRight: Radius.circular(18),
+              //call the locate posion function
+              locatePosition();
+              setState(() {
+                bottomPaddingOfMap = 280.0;
+              });
+            },
+          ),
+          Positioned(
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: Container(
+              height: 280,
+              width: 200,
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(18),
+                    topRight: Radius.circular(18),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black,
+                      blurRadius: 16.0,
+                      spreadRadius: 0.5,
+                      offset: Offset(0.7, 0.7),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black,
-                        blurRadius: 16.0,
-                        spreadRadius: 0.5,
-                        offset: Offset(0.7, 0.7),
+                  ]),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 6.0,
+                    ),
+                    const Center(
+                      child: Text(
+                        "Hi there, ",
+                        style: TextStyle(fontSize: 12.0),
                       ),
-                    ]),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 18.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        height: 6.0,
+                    ),
+                    const Center(
+                      child: Text(
+                        "Where to? ",
+                        style:
+                            TextStyle(fontSize: 20.0, fontFamily: "Brand-Bold"),
                       ),
-                      const Center(
-                        child: Text(
-                          "Hi there, ",
-                          style: TextStyle(fontSize: 12.0),
-                        ),
-                      ),
-                      const Center(
-                        child: Text(
-                          "Where to? ",
-                          style: TextStyle(
-                              fontSize: 20.0, fontFamily: "Brand-Bold"),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20.0,
-                      ),
-                      Container(
+                    ),
+                    const SizedBox(
+                      height: 20.0,
+                    ),
+                    //search screen
+                    GestureDetector(
+                      onTap: (() async {
+                        var resp = Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                //fullscreenDialog: true,
+                                builder: (context) => const SearchScreen()));
+
+                        // ignore: unrelated_type_equality_checks
+                        if (resp == "obtainDirection") {
+                          //now we get the place from the serach screen
+                          await getPlaceDirction();
+                        }
+                      }),
+                      child: Container(
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(5.0),
@@ -180,80 +200,108 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      //Home address row
-                      const SizedBox(
-                        height: 24.0,
-                      ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.home,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(Provider.of<AppData>(context)
-                                          .pickUpLocation !=
-                                      null
-                                  ? Provider.of<AppData>(context)
-                                      .pickUpLocation!
-                                      .placeName!
-                                  : "its returning null"),
-                              const SizedBox(
-                                height: 4.0,
-                              ),
-                              Text(
-                                "Your living home address,",
-                                style: TextStyle(
-                                    color: Colors.grey[400], fontSize: 12),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 14.0,
-                      ),
-                      const DividerWidget(),
-                      // office address row
-                      const SizedBox(
-                        height: 14.0,
-                      ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.work,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Add Work"),
-                              const SizedBox(
-                                height: 4.0,
-                              ),
-                              Text(
-                                "Your office address,",
-                                style: TextStyle(
-                                    color: Colors.grey[400], fontSize: 12),
-                              )
-                            ],
-                          )
-                        ],
-                      )
-                    ],
-                  ),
+                    ),
+                    //Home address row
+                    const SizedBox(
+                      height: 24.0,
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.home,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              homeAddress.isNotEmpty
+                                  ? homeAddress.toString()
+                                  : "it is empty",
+                              style: const TextStyle(
+                                  color: Colors.black, fontSize: 20),
+                            ),
+                            const SizedBox(
+                              height: 4.0,
+                            ),
+                            Text(
+                              "Your living home address,",
+                              style: TextStyle(
+                                  color: Colors.grey[400], fontSize: 12),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 14.0,
+                    ),
+                    const DividerWidget(),
+                    // office address row
+                    const SizedBox(
+                      height: 14.0,
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.work,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Add Work"),
+                            const SizedBox(
+                              height: 4.0,
+                            ),
+                            Text(
+                              "Your office address,",
+                              style: TextStyle(
+                                  color: Colors.grey[400], fontSize: 12),
+                            )
+                          ],
+                        )
+                      ],
+                    )
+                  ],
                 ),
               ),
-            )
-          ],
-        ));
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> getPlaceDirction() async {
+    var initialPos =
+        Provider.of<AppData>(context, listen: false).pickUpLocation;
+    var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation;
+
+    var pickUpLatLng = LatLng(initialPos!.latitude!, initialPos.longitude!);
+    var dropOffLatLng = LatLng(finalPos!.latitude!, finalPos.longitude!);
+
+    //to show user that the place is loading
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const ProgressDialog(
+            message: "Please wait...",
+          );
+        });
+
+    var details = await AssistantMethods.obtainPlaceDirectionDetails(
+        pickUpLatLng, dropOffLatLng);
+
+    Navigator.pop(context);
+
+    debugPrint("This is the Encoded Points: ");
+    debugPrint(details?.encodedPoints);
   }
 }
